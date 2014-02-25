@@ -14,15 +14,15 @@ int main(int argc, char *argv[]) try
 	Mat empty = imread("data\\empty.png", CV_LOAD_IMAGE_GRAYSCALE);
 	empty = CropCctvBorder(empty);
 
-	Mat sample = imread("samples\\all\\lc-00240.png", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat sample = imread("samples\\all\\lc-00082.png", CV_LOAD_IMAGE_GRAYSCALE);
 	sample = CropCctvBorder(sample);
 	imshow("orig", sample);
 
 	Mat image;
 	absdiff(empty, sample, image);
+	imshow("inter", image);
 
 	threshold(image, image, 70, 255, THRESH_BINARY);
-	imshow("inter", image);
 
 	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4, 4));
 	dilate(image, image, kernel, Point(-1,-1), 3);
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) try
 	{
 		auto& contour = contours[i];
 		double area = contourArea(contour);
-		if (area > 65.0)
+		if (area > 400.0)
 			drawContours(imageColour, contours, i, Scalar(0, 0, 255), CV_FILLED);
 	}
 
