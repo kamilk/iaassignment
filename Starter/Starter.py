@@ -26,10 +26,3 @@ while True:
 
     exit_code = call([exe, path, '..\\IaAssignment\\data\\empty.png'])
     if exit_code == 1: break
-
-    individual_path = '..\\IaAssignment\\samples\\individual'
-    categories = os.listdir(individual_path)
-    for category in categories:
-        path = os.path.join(individual_path, category)
-        if file in os.listdir(path):
-            print category
