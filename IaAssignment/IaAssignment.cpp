@@ -16,8 +16,8 @@ bool IsContourAcceptable(vector<Point>& contour)
 	if (area < 400)
 		return false;
 
-	double perimiter = arcLength(contour, true);
-	double compactness = perimiter * perimiter / area;
+	double perimeter = arcLength(contour, true);
+	double compactness = perimeter * perimeter / area;
 	if (compactness > 30 * CV_PI)
 		return false;
 
