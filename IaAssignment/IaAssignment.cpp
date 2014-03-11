@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv.hpp>
+#include <fstream>
 
 using namespace std;
 using namespace cv;
@@ -25,10 +26,23 @@ bool IsContourAcceptable(vector<Point>& contour)
 
 int main(int argc, char *argv[]) try
 {
-	Mat empty = imread("data\\empty.png", CV_LOAD_IMAGE_GRAYSCALE);
+	const char* sampleFileName;
+	const char* emptyRoadFileName;
+	if (argc >= 3)
+	{
+		sampleFileName = argv[1];
+		emptyRoadFileName = argv[2];
+	}
+	else
+	{
+		sampleFileName = "samples\\all\\lc-00579.png";
+		emptyRoadFileName = "data\\empty.png";
+	}
+
+	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
 	empty = CropCctvBorder(empty);
 
-	Mat sample = imread("samples\\all\\lc-00579.png", CV_LOAD_IMAGE_GRAYSCALE);
+	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
 	sample = CropCctvBorder(sample);
 	imshow("orig", sample);
 
