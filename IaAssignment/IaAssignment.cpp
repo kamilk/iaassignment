@@ -24,6 +24,34 @@ bool IsContourAcceptable(vector<Point>& contour)
 	return true;
 }
 
+int GetNumberOfWhitePixelsInPolygon(const Mat& image, const vector<Point>& polygon)
+{
+	int result = 0;
+
+	for (int i = 0; i < image.rows; i++)
+	for (int j = 0; j < image.cols; j++)
+	{
+		if (image.at<uchar>(i, j) > 0 && pointPolygonTest(polygon, Point2f(j, i), false) >= 0)
+			++result;
+	}
+
+	return result;
+}
+
+int GetNumberOfWhitePixels(const Mat& image)
+{
+	int result = 0;
+
+	for (int i = 0; i < image.rows; i++)
+	for (int j = 0; j < image.cols; j++)
+	{
+		if (image.at<uchar>(i, j) > 0)
+			++result;
+	}
+
+	return result;
+}
+
 int main(int argc, char *argv[]) try
 {
 	const char* sampleFileName;
@@ -35,7 +63,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00579.png";
+		sampleFileName = "samples\\all\\lc-00262.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
@@ -44,6 +72,7 @@ int main(int argc, char *argv[]) try
 
 	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
 	sample = CropCctvBorder(sample);
+
 	imshow("orig", sample);
 
 	Mat image;
@@ -61,6 +90,15 @@ int main(int argc, char *argv[]) try
 	vector<vector<Point>> contours;
 	findContours(image.clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
+	vector<vector<Point>> polygon;
+	polygon.push_back(vector<Point>());
+	polygon[0].push_back(Point(0, 0));
+	polygon[0].push_back(Point(70, 0));
+	polygon[0].push_back(Point(415, 170));
+	polygon[0].push_back(Point(190, 285));
+	polygon[0].push_back(Point(0, 140));
+	drawContours(sample, polygon, 0, Scalar(0, 255, 0), 3);
+
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
 
@@ -68,7 +106,18 @@ int main(int argc, char *argv[]) try
 	{
 		auto& contour = contours[i];
 		if (IsContourAcceptable(contour))
+		{
 			drawContours(imageColour, contours, i, Scalar(0, 0, 255), CV_FILLED);
+
+			Mat contourImage = Mat::zeros(image.rows, image.cols, CV_8U);
+			drawContours(contourImage, contours, i, Scalar(255), CV_FILLED);
+			int number = GetNumberOfWhitePixelsInPolygon(contourImage, polygon[0]);
+			double area = GetNumberOfWhitePixels(contourImage);
+			double ratio = (double)number / area * 100.0;
+			cout << number << " / " << area << " (" << ratio << "%)" << endl;
+			imshow("contour", contourImage);
+			waitKey();
+		}
 	}
 
 	imshow("result", imageColour);
