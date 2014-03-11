@@ -55,8 +55,6 @@ int main(int argc, char *argv[]) try
 	dilate(image, image, kernel, Point(-1,-1), 3);
 	erode(image, image, kernel, Point(-1, -1), 3);
 
-	imshow("inter", image);
-
 	erode(image, image, kernel, Point(-1, -1), 3);
 	dilate(image, image, kernel, Point(-1, -1), 3);
 
@@ -74,7 +72,8 @@ int main(int argc, char *argv[]) try
 	}
 
 	imshow("result", imageColour);
-	waitKey();
+	int key = waitKey();
+	return key == 'x' ? 1 : 0;
 }
 catch (cv::Exception &ex)
 {
