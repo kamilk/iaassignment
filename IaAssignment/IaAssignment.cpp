@@ -87,7 +87,6 @@ int main(int argc, char *argv[]) try
 	imshow("Y", channels[1]);
 	imshow("Z", channels[2]);
 	
-	//threshold(image, image, 70, 255, THRESH_BINARY);
 	Mat image(diff.rows, diff.cols, CV_8U);
 	for (int i = 0; i < diff.rows; i++)
 	for (int j = 0; j < diff.cols; j++)
@@ -131,8 +130,6 @@ int main(int argc, char *argv[]) try
 			double area = GetNumberOfWhitePixels(contourImage);
 			double ratio = (double)number / area * 100.0;
 			cout << number << " / " << area << " (" << ratio << "%)" << endl;
-			//imshow("contour", contourImage);
-			//waitKey();
 		}
 	}
 
