@@ -52,8 +52,65 @@ int GetNumberOfWhitePixels(const Mat& image)
 	return result;
 }
 
+vector<Mat> backgrounds;
+
+double gaussianFunction(double x, double sigma)
+{
+	// http://www.cplusplus.com/forum/beginner/62864/#msg340340
+	static const double pi = 3.14159265;
+	static const double mu = 0.0;
+	return exp(-1 * (x - mu) * (x - mu) / (2 * sigma * sigma)) / (sigma * sqrt(2 * pi));
+}
+
+bool IsPixelForeground(Mat image, int i, int j)
+{
+	double backgroundLightness = 0.0;
+	for (auto& background : backgrounds)
+	{
+		backgroundLightness += background.at<Vec3b>(i, j)[1];
+	}
+
+	backgroundLightness /= backgrounds.size();
+
+	Vec3b pixel = image.at<Vec3b>(i, j);
+	double lightnessRatio = pixel[1] / backgroundLightness;
+	if (lightnessRatio >= 0.8 && lightnessRatio <= 1.3)
+		return false;
+
+	double chanceOfXIfBackground = 0.0;
+	for (auto& background : backgrounds)
+	{
+		Vec3b backgroundPixel = background.at<Vec3b>(i, j);
+		Vec3b diff = pixel - backgroundPixel;
+		const double sigma = 4;
+		chanceOfXIfBackground += gaussianFunction(diff[0], sigma) * gaussianFunction(diff[2], sigma);
+	}
+
+	chanceOfXIfBackground /= backgrounds.size();
+	const double chanceOfBackground = 0.7;
+	const double chanceOfForeground = 1.0 - chanceOfBackground;
+	const double chanceOfXIfForeground = 0.01;
+	double chanceOfBackgroundIfX = chanceOfXIfBackground * chanceOfBackground
+		/ (chanceOfXIfBackground * chanceOfBackground + chanceOfXIfForeground * chanceOfForeground);
+
+	return chanceOfBackgroundIfX > 0.5;
+}
+
 int main(int argc, char *argv[]) try
 {
+	for (int i = 1; i <= 18; i++)
+	{
+		ostringstream backgroundPath;
+		backgroundPath << "data\\background\\" << i << ".png";
+		Mat background = imread(backgroundPath.str(), CV_LOAD_IMAGE_COLOR);
+
+		background = CropCctvBorder(background);
+		cvtColor(background, background, COLOR_BGR2XYZ);
+
+		backgrounds.push_back(background);
+	}
+
+
 	const char* sampleFileName;
 	const char* emptyRoadFileName;
 	if (argc >= 3)
@@ -80,19 +137,13 @@ int main(int argc, char *argv[]) try
 
 	Mat diff;
 	absdiff(empty, sample, diff);
-
-	vector<Mat> channels;
-	split(diff, channels);
-	imshow("X", channels[0]);
-	imshow("Y", channels[1]);
-	imshow("Z", channels[2]);
 	
 	Mat image(diff.rows, diff.cols, CV_8U);
 	for (int i = 0; i < diff.rows; i++)
 	for (int j = 0; j < diff.cols; j++)
 	{
 		Vec3b xyz = diff.at<Vec3b>(i, j);
-		image.at<uchar>(i, j) = xyz[0] >= 70 && xyz[1] >= 70 && xyz[2] >= 70 ? 255 : 0;
+		image.at<uchar>(i, j) = IsPixelForeground(diff, i, j) ? 255 : 0;
 	}
 
 	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4, 4));
@@ -140,15 +191,12 @@ int main(int argc, char *argv[]) try
 catch (cv::Exception &ex)
 {
 	std::cerr << ex.code << std::endl;
-	cin.get();
 }
 catch (std::exception &ex)
 {
 	std::cerr << "Exception of type " << typeid(ex).name() << " with message " << ex.what() << std::endl;
-	cin.get();
 }
 catch (...)
 {
 	std::cerr << "Unexpected error!" << std::endl;
-	cin.get();
 }
