@@ -63,22 +63,38 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00262.png";
+		sampleFileName = "samples\\all\\lc-00473.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
-	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
+	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_COLOR);
 	empty = CropCctvBorder(empty);
 
-	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
+	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_COLOR);
 	sample = CropCctvBorder(sample);
 
 	imshow("orig", sample);
 
-	Mat image;
-	absdiff(empty, sample, image);
+	cvtColor(empty, empty, COLOR_BGR2XYZ);
+	cvtColor(sample, sample, COLOR_BGR2XYZ);
+
+	Mat diff;
+	absdiff(empty, sample, diff);
+
+	vector<Mat> channels;
+	split(diff, channels);
+	imshow("X", channels[0]);
+	imshow("Y", channels[1]);
+	imshow("Z", channels[2]);
 	
-	threshold(image, image, 70, 255, THRESH_BINARY);
+	//threshold(image, image, 70, 255, THRESH_BINARY);
+	Mat image(diff.rows, diff.cols, CV_8U);
+	for (int i = 0; i < diff.rows; i++)
+	for (int j = 0; j < diff.cols; j++)
+	{
+		Vec3b xyz = diff.at<Vec3b>(i, j);
+		image.at<uchar>(i, j) = xyz[0] >= 70 && xyz[1] >= 70 && xyz[2] >= 70 ? 255 : 0;
+	}
 
 	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4, 4));
 	dilate(image, image, kernel, Point(-1,-1), 3);
@@ -115,8 +131,8 @@ int main(int argc, char *argv[]) try
 			double area = GetNumberOfWhitePixels(contourImage);
 			double ratio = (double)number / area * 100.0;
 			cout << number << " / " << area << " (" << ratio << "%)" << endl;
-			imshow("contour", contourImage);
-			waitKey();
+			//imshow("contour", contourImage);
+			//waitKey();
 		}
 	}
 
@@ -127,12 +143,15 @@ int main(int argc, char *argv[]) try
 catch (cv::Exception &ex)
 {
 	std::cerr << ex.code << std::endl;
+	cin.get();
 }
 catch (std::exception &ex)
 {
 	std::cerr << "Exception of type " << typeid(ex).name() << " with message " << ex.what() << std::endl;
+	cin.get();
 }
 catch (...)
 {
 	std::cerr << "Unexpected error!" << std::endl;
+	cin.get();
 }
