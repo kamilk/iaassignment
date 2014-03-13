@@ -52,6 +52,23 @@ int GetNumberOfWhitePixels(const Mat& image)
 	return result;
 }
 
+void CommonPreprocessing(Mat& image)
+{
+	int kernel_size = 3;
+	int scale = 1;
+	int delta = 0;
+	int ddepth = CV_16S;
+
+	image = CropCctvBorder(image);
+	GaussianBlur(image, image, Size(3, 3), 0, 0, BORDER_DEFAULT);
+	
+	Laplacian(image, image, ddepth, kernel_size, scale, delta, BORDER_DEFAULT);
+
+	convertScaleAbs(image, image);
+
+	image.convertTo(image, CV_8U);
+}
+
 int main(int argc, char *argv[]) try
 {
 	const char* sampleFileName;
@@ -68,17 +85,19 @@ int main(int argc, char *argv[]) try
 	}
 
 	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
-	empty = CropCctvBorder(empty);
+	CommonPreprocessing(empty);
 
 	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
-	sample = CropCctvBorder(sample);
+	CommonPreprocessing(sample);
 
 	imshow("orig", sample);
 
 	Mat image;
 	absdiff(empty, sample, image);
 	
-	threshold(image, image, 70, 255, THRESH_BINARY);
+	imshow("inter", image);
+	
+	threshold(image, image, 50, 255, THRESH_BINARY);
 
 	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4, 4));
 	dilate(image, image, kernel, Point(-1,-1), 3);
@@ -115,8 +134,6 @@ int main(int argc, char *argv[]) try
 			double area = GetNumberOfWhitePixels(contourImage);
 			double ratio = (double)number / area * 100.0;
 			cout << number << " / " << area << " (" << ratio << "%)" << endl;
-			imshow("contour", contourImage);
-			waitKey();
 		}
 	}
 
