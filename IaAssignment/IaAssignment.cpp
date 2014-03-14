@@ -115,8 +115,6 @@ int main(int argc, char *argv[]) try
 			double area = GetNumberOfWhitePixels(contourImage);
 			double ratio = (double)number / area * 100.0;
 			cout << number << " / " << area << " (" << ratio << "%)" << endl;
-			imshow("contour", contourImage);
-			waitKey();
 		}
 	}
 
