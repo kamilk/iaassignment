@@ -52,7 +52,7 @@ int GetNumberOfWhitePixels(const Mat& image)
 	return result;
 }
 
-Mat ConvertBgrToChromacity(const Mat& image)
+Mat ConvertBgrToChromacityAndLightness(const Mat& image)
 {
 	Mat result(image.rows, image.cols, CV_32FC3);
 	for (int i = 0; i < image.rows; i++)
@@ -60,7 +60,7 @@ Mat ConvertBgrToChromacity(const Mat& image)
 		{
 			Vec3b pixel = image.at<Vec3b>(i, j);
 			float sum = (float)pixel[0] + pixel[1] + pixel[2];
-			Vec3f newPixel(pixel[0] / sum, pixel[1] / sum, pixel[2] / sum);
+			Vec3f newPixel(pixel[0] / sum, pixel[1] / sum, sum / 3.0f / 255.0f);
 			result.at<Vec3f>(i, j) = newPixel;
 		}
 
@@ -78,30 +78,38 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00227.png";
+		sampleFileName = "samples\\all\\lc-00445.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
 	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_COLOR);
 	empty = CropCctvBorder(empty);
-	
+
 	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_COLOR);
 	sample = CropCctvBorder(sample);
-	
+
 	imshow("orig", sample);
 
-	empty = ConvertBgrToChromacity(empty);
-	sample = ConvertBgrToChromacity(sample);
+	empty = ConvertBgrToChromacityAndLightness(empty);
+	sample = ConvertBgrToChromacityAndLightness(sample);
 
 	Mat image;
 	absdiff(empty, sample, image);
 
-	cvtColor(image, image, COLOR_BGR2GRAY);
+	vector<Mat> channels;
+	split(image, channels);
 
-	convertScaleAbs(image, image, 255);
-	imshow("inter", image);
+	for (auto& channel : channels)
+		convertScaleAbs(channel, channel, 255);
 
-	threshold(image, image, 3, 255, THRESH_BINARY);
+	for (int i = 0; i < 2; i++)
+		threshold(channels[i], channels[i], 7, 255, THRESH_BINARY);
+	threshold(channels[2], channels[2], 80, 255, THRESH_BINARY);
+
+	imshow("c1", channels[0] &channels[1]);
+	imshow("c2", channels[2]);
+
+	image = (channels[0] | channels[1]) | channels[2];
 
 	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4, 4));
 	dilate(image, image, kernel, Point(-1, -1), 3);
