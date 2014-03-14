@@ -29,11 +29,11 @@ int GetNumberOfWhitePixelsInPolygon(const Mat& image, const vector<Point>& polyg
 	int result = 0;
 
 	for (int i = 0; i < image.rows; i++)
-	for (int j = 0; j < image.cols; j++)
-	{
-		if (image.at<uchar>(i, j) > 0 && pointPolygonTest(polygon, Point2f(j, i), false) >= 0)
-			++result;
-	}
+		for (int j = 0; j < image.cols; j++)
+		{
+			if (image.at<uchar>(i, j) > 0 && pointPolygonTest(polygon, Point2f((float)j, (float)i), false) >= 0)
+				++result;
+		}
 
 	return result;
 }
@@ -43,11 +43,26 @@ int GetNumberOfWhitePixels(const Mat& image)
 	int result = 0;
 
 	for (int i = 0; i < image.rows; i++)
-	for (int j = 0; j < image.cols; j++)
-	{
-		if (image.at<uchar>(i, j) > 0)
-			++result;
-	}
+		for (int j = 0; j < image.cols; j++)
+		{
+			if (image.at<uchar>(i, j) > 0)
+				++result;
+		}
+
+	return result;
+}
+
+Mat ConvertBgrToChromacity(const Mat& image)
+{
+	Mat result(image.rows, image.cols, CV_32FC3);
+	for (int i = 0; i < image.rows; i++)
+		for (int j = 0; j < image.cols; j++)
+		{
+			Vec3b pixel = image.at<Vec3b>(i, j);
+			float sum = (float)pixel[0] + pixel[1] + pixel[2];
+			Vec3f newPixel(pixel[0] / sum, pixel[1] / sum, pixel[2] / sum);
+			result.at<Vec3f>(i, j) = newPixel;
+		}
 
 	return result;
 }
@@ -63,25 +78,33 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00262.png";
+		sampleFileName = "samples\\all\\lc-00227.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
-	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
+	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_COLOR);
 	empty = CropCctvBorder(empty);
-
-	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
+	
+	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_COLOR);
 	sample = CropCctvBorder(sample);
-
+	
 	imshow("orig", sample);
+
+	empty = ConvertBgrToChromacity(empty);
+	sample = ConvertBgrToChromacity(sample);
 
 	Mat image;
 	absdiff(empty, sample, image);
-	
-	threshold(image, image, 70, 255, THRESH_BINARY);
+
+	cvtColor(image, image, COLOR_BGR2GRAY);
+
+	convertScaleAbs(image, image, 255);
+	imshow("inter", image);
+
+	threshold(image, image, 3, 255, THRESH_BINARY);
 
 	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4, 4));
-	dilate(image, image, kernel, Point(-1,-1), 3);
+	dilate(image, image, kernel, Point(-1, -1), 3);
 	erode(image, image, kernel, Point(-1, -1), 3);
 
 	erode(image, image, kernel, Point(-1, -1), 3);
@@ -115,8 +138,6 @@ int main(int argc, char *argv[]) try
 			double area = GetNumberOfWhitePixels(contourImage);
 			double ratio = (double)number / area * 100.0;
 			cout << number << " / " << area << " (" << ratio << "%)" << endl;
-			imshow("contour", contourImage);
-			waitKey();
 		}
 	}
 
