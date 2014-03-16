@@ -52,6 +52,27 @@ int GetNumberOfWhitePixels(const Mat& image)
 	return result;
 }
 
+vector<Point> GetUpperLeftPolygon()
+{
+	vector<Point> polygon;
+	polygon.push_back(Point(0, 0));
+	polygon.push_back(Point(70, 0));
+	polygon.push_back(Point(395, 145));
+	polygon.push_back(Point(175, 255));
+	polygon.push_back(Point(0, 140));
+	return polygon;
+}
+
+vector<Point> GetUpperRightPolygon()
+{
+	vector<Point> polygon;
+	polygon.push_back(Point(70, 0));
+	polygon.push_back(Point(395, 145));
+	polygon.push_back(Point(520, 80));
+	polygon.push_back(Point(285, 0));
+	return polygon;
+}
+
 int main(int argc, char *argv[]) try
 {
 	const char* sampleFileName;
@@ -88,13 +109,9 @@ int main(int argc, char *argv[]) try
 	vector<vector<Point>> contours;
 	findContours(image.clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-	vector<vector<Point>> polygon;
-	polygon.push_back(vector<Point>());
-	polygon[0].push_back(Point(0, 0));
-	polygon[0].push_back(Point(70, 0));
-	polygon[0].push_back(Point(415, 170));
-	polygon[0].push_back(Point(190, 285));
-	polygon[0].push_back(Point(0, 140));
+	vector<vector<Point>> polygons;
+	polygons.push_back(GetUpperLeftPolygon());
+	polygons.push_back(GetUpperRightPolygon());
 
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
@@ -108,15 +125,15 @@ int main(int argc, char *argv[]) try
 
 			Mat contourImage = Mat::zeros(image.rows, image.cols, CV_8U);
 			drawContours(contourImage, contours, i, Scalar(255), CV_FILLED);
-			int number = GetNumberOfWhitePixelsInPolygon(contourImage, polygon[0]);
+			int number = GetNumberOfWhitePixelsInPolygon(contourImage, polygons[0]);
 			double area = GetNumberOfWhitePixels(contourImage);
 			double ratio = (double)number / area * 100.0;
 			cout << number << " / " << area << " (" << ratio << "%)" << endl;
 		}
 	}
 
-	drawContours(sample, polygon, 0, Scalar(0), 2);
-	drawContours(imageColour, polygon, 0, Scalar(0, 255, 0), 2);
+	drawContours(sample, polygons, -1, Scalar(0), 2);
+	drawContours(imageColour, polygons, -1, Scalar(0, 255, 0), 2);
 
 	imshow("orig", sample);
 	imshow("result", imageColour);
