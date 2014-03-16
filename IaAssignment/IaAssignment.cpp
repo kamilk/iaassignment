@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00262.png";
+		sampleFileName = "samples\\all\\lc-00241.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) try
 	
 	threshold(image, image, 70, 255, THRESH_BINARY);
 
-	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(4, 4));
+	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(6, 6));
 	dilate(image, image, kernel, Point(-1,-1), 3);
 	erode(image, image, kernel, Point(-1, -1), 3);
 
