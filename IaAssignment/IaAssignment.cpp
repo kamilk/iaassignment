@@ -73,8 +73,6 @@ int main(int argc, char *argv[]) try
 	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
 	sample = CropCctvBorder(sample);
 
-	imshow("orig", sample);
-
 	Mat image;
 	absdiff(empty, sample, image);
 	
@@ -97,7 +95,6 @@ int main(int argc, char *argv[]) try
 	polygon[0].push_back(Point(415, 170));
 	polygon[0].push_back(Point(190, 285));
 	polygon[0].push_back(Point(0, 140));
-	drawContours(sample, polygon, 0, Scalar(0, 255, 0), 3);
 
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
@@ -118,7 +115,12 @@ int main(int argc, char *argv[]) try
 		}
 	}
 
+	drawContours(sample, polygon, 0, Scalar(0), 2);
+	drawContours(imageColour, polygon, 0, Scalar(0, 255, 0), 2);
+
+	imshow("orig", sample);
 	imshow("result", imageColour);
+
 	int key = waitKey();
 	return key == 'x' ? 1 : 0;
 }
