@@ -67,6 +67,10 @@ int main(int argc, char *argv[]) try
 	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
 	sample = CropCctvBorder(sample);
 
+	auto clahe = createCLAHE();
+	clahe->apply(empty, empty);
+	clahe->apply(sample, sample);
+
 	Mat image;
 	absdiff(empty, sample, image);
 	
