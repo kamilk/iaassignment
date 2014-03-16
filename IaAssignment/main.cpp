@@ -46,6 +46,25 @@ vector<Point> GetUpperRightPolygon()
 	return polygon;
 }
 
+vector<Point> GetBottomLeftPolygon()
+{
+	vector<Point> polygon;
+	polygon.push_back(Point(580, 225));
+	polygon.push_back(Point(665, 275));
+	polygon.push_back(Point(665, 404));
+	polygon.push_back(Point(315, 404));
+	return polygon;
+}
+
+vector<Point> GetBottomRightPolygon()
+{
+	vector<Point> polygon;
+	polygon.push_back(Point(580, 225));
+	polygon.push_back(Point(665, 275));
+	polygon.push_back(Point(665, 160));
+	return polygon;
+}
+
 int main(int argc, char *argv[]) try
 {
 	const char* sampleFileName;
@@ -83,8 +102,10 @@ int main(int argc, char *argv[]) try
 	findContours(image.clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
 	vector<Polygon> polygons;
-	polygons.push_back(Polygon("A", GetUpperLeftPolygon()));
-	polygons.push_back(Polygon("B", GetUpperRightPolygon()));
+	polygons.push_back(Polygon("UL", GetUpperLeftPolygon()));
+	polygons.push_back(Polygon("UR", GetUpperRightPolygon()));
+	polygons.push_back(Polygon("BL", GetBottomLeftPolygon()));
+	polygons.push_back(Polygon("BR", GetBottomRightPolygon()));
 
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
