@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv.hpp>
 #include <fstream>
+#include "Polygon.h"
 
 using namespace std;
 using namespace cv;
@@ -22,34 +23,6 @@ bool IsContourAcceptable(vector<Point>& contour)
 		return false;
 
 	return true;
-}
-
-int GetNumberOfWhitePixelsInPolygon(const Mat& image, const vector<Point>& polygon)
-{
-	int result = 0;
-
-	for (int i = 0; i < image.rows; i++)
-	for (int j = 0; j < image.cols; j++)
-	{
-		if (image.at<uchar>(i, j) > 0 && pointPolygonTest(polygon, Point2f(j, i), false) >= 0)
-			++result;
-	}
-
-	return result;
-}
-
-int GetNumberOfWhitePixels(const Mat& image)
-{
-	int result = 0;
-
-	for (int i = 0; i < image.rows; i++)
-	for (int j = 0; j < image.cols; j++)
-	{
-		if (image.at<uchar>(i, j) > 0)
-			++result;
-	}
-
-	return result;
 }
 
 vector<Point> GetUpperLeftPolygon()
@@ -109,9 +82,9 @@ int main(int argc, char *argv[]) try
 	vector<vector<Point>> contours;
 	findContours(image.clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-	vector<vector<Point>> polygons;
-	polygons.push_back(GetUpperLeftPolygon());
-	polygons.push_back(GetUpperRightPolygon());
+	vector<Polygon> polygons;
+	polygons.push_back(Polygon("A", GetUpperLeftPolygon()));
+	polygons.push_back(Polygon("B", GetUpperRightPolygon()));
 
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
@@ -125,15 +98,19 @@ int main(int argc, char *argv[]) try
 
 			Mat contourImage = Mat::zeros(image.rows, image.cols, CV_8U);
 			drawContours(contourImage, contours, i, Scalar(255), CV_FILLED);
-			int number = GetNumberOfWhitePixelsInPolygon(contourImage, polygons[0]);
-			double area = GetNumberOfWhitePixels(contourImage);
-			double ratio = (double)number / area * 100.0;
-			cout << number << " / " << area << " (" << ratio << "%)" << endl;
+			for (auto& polygon : polygons)
+				polygon.TestContour(contourImage);
 		}
 	}
 
-	drawContours(sample, polygons, -1, Scalar(0), 2);
-	drawContours(imageColour, polygons, -1, Scalar(0, 255, 0), 2);
+	for (auto& polygon : polygons)
+		polygon.Write(cout);
+
+	for (auto& polygon : polygons)
+	{
+		polygon.Draw(sample, Scalar(0));
+		polygon.Draw(imageColour, Scalar(0, 255, 0));
+	}
 
 	imshow("orig", sample);
 	imshow("result", imageColour);

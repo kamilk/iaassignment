@@ -82,7 +82,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="functions.cpp" />
     <ClCompile Include="IaAssignment.cpp" />
+    <ClCompile Include="Polygon.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ContourPolygonStats.h" />
+    <ClInclude Include="functions.h" />
+    <ClInclude Include="Polygon.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
