@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) try
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
 
-	for (int i = 0; i < contours.size(); i++)
+	for (unsigned int i = 0; i < contours.size(); i++)
 	{
 		auto& contour = contours[i];
 		if (IsContourAcceptable(contour))
