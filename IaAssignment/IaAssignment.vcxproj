@@ -83,7 +83,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="functions.cpp" />
-    <ClCompile Include="IaAssignment.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Polygon.cpp" />
   </ItemGroup>
   <ItemGroup>
