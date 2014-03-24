@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00165.png";
+		sampleFileName = "samples\\all\\lc-00480.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
