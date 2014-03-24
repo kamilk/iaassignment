@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00408.png";
+		sampleFileName = "samples\\all\\lc-00318.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) try
 	{
 		float rho = lines[i][0], theta = lines[i][1];
 		Scalar colour;
-		if (rho < 300.0f && theta > 1.15f && theta < 1.23f)
+		if (rho < 280.0f && theta > 1.15f && theta < 1.23f)
 		{
 			if (!isTrain || highestTrainLine[0] > rho)
 				highestTrainLine = lines[i];
@@ -186,13 +186,13 @@ int main(int argc, char *argv[]) try
 		DrawLinePolar(samplePreview, rho, theta, colour);
 	}
 
+	if (isTrain)
+		DrawLinePolar(samplePreview, highestTrainLine[0], highestTrainLine[1], Scalar(0, 255, 255), 3);
+
 	if (ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt())
 		cout << "ENTERING!!!" << endl;
 	if (!isTrain && (blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt()))
 		cout << "LEAVING!!!" << endl;
-	if (isTrain)
-		DrawLinePolar(samplePreview, highestTrainLine[0], highestTrainLine[1], Scalar(0, 255, 255), 3);
-
 	if (isTrain)
 		cout << "TRAIN!!!" << endl;
 	if (!isTrain && trackPolygon->IsObjectInIt())
