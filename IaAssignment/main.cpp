@@ -77,19 +77,21 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00241.png";
+		sampleFileName = "samples\\all\\lc-00166.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
 	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
 	empty = CropCctvBorder(empty);
 
-	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_GRAYSCALE);
+	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_COLOR);
 	sample = CropCctvBorder(sample);
+	Mat samplePreview = sample.clone();
+	cvtColor(sample, sample, COLOR_BGR2GRAY);
 
 	Mat image;
 	absdiff(empty, sample, image);
-	
+
 	threshold(image, image, 70, 255, THRESH_BINARY);
 
 	Mat kernel = getStructuringElement(MORPH_ELLIPSE, Size(6, 6));
@@ -135,7 +137,7 @@ int main(int argc, char *argv[]) try
 
 	for (auto& polygon : polygons)
 	{
-		polygon->Draw(sample, Scalar(0));
+		polygon->Draw(samplePreview, Scalar(0, 255, 0));
 		polygon->Draw(imageColour, Scalar(0, 255, 0));
 	}
 
@@ -146,7 +148,36 @@ int main(int argc, char *argv[]) try
 
 	cout << endl;
 
-	imshow("orig", sample);
+	//Mat gauss;
+	//GaussianBlur(sample, gauss, Size(7, 7), 20);
+	//Mat edges2;
+	//absdiff(sample, gauss, edges2);
+	//sample = sample + 2 * edges2;
+
+	Mat edges;
+	Canny(sample, edges, 10, 200, 3);
+	imshow("canny", edges);
+
+	Mat hough = Mat::zeros(sample.size(), CV_8U);
+
+	vector<Vec2f> lines;
+	HoughLines(edges, lines, 1, CV_PI/180, 120, 0, 0 );
+	for( size_t i = 0; i < lines.size(); i++ )
+	{
+		float rho = lines[i][0], theta = lines[i][1];
+		Point pt1, pt2;
+		double a = cos(theta), b = sin(theta);
+		double x0 = a*rho, y0 = b*rho;
+		pt1.x = cvRound(x0 + 1000*(-b));
+		pt1.y = cvRound(y0 + 1000*(a));
+		pt2.x = cvRound(x0 - 1000*(-b));
+		pt2.y = cvRound(y0 - 1000*(a));
+		line( samplePreview, pt1, pt2, Scalar(255, 0, 0), 3, CV_AA);
+	}
+
+	//imshow("hough", hough);
+
+	imshow("orig", samplePreview);
 	imshow("result", imageColour);
 
 	int key = waitKey();
