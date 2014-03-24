@@ -14,7 +14,7 @@ int GetNumberOfWhitePixelsInPolygon(const Mat& image, const vector<Point>& polyg
 				++result;
 		}
 
-	return result;
+		return result;
 }
 
 int GetNumberOfWhitePixels(const Mat& image)
@@ -28,5 +28,19 @@ int GetNumberOfWhitePixels(const Mat& image)
 				++result;
 		}
 
-	return result;
+		return result;
+}
+
+void DrawLinePolar(cv::Mat& image, float rho, float theta, Scalar colour)
+{
+	// adapted from http://docs.opencv.org/doc/tutorials/imgproc/imgtrans/hough_lines/hough_lines.html
+	Point pt1, pt2;
+	double a = cos(theta), b = sin(theta);
+	double x0 = a*rho, y0 = b*rho;
+	pt1.x = cvRound(x0 + 1000*(-b));
+	pt1.y = cvRound(y0 + 1000*(a));
+	pt2.x = cvRound(x0 - 1000*(-b));
+	pt2.y = cvRound(y0 - 1000*(a));
+
+	line( image, pt1, pt2, colour, 1, CV_AA);
 }

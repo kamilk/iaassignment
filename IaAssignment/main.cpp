@@ -3,6 +3,7 @@
 #include <fstream>
 #include <memory>
 #include "Polygon.h"
+#include "functions.h"
 
 using namespace std;
 using namespace cv;
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00166.png";
+		sampleFileName = "samples\\all\\lc-00165.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
@@ -146,39 +147,40 @@ int main(int argc, char *argv[]) try
 	if (blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt())
 		cout << "LEAVING!!!" << endl;
 
-	cout << endl;
-
-	//Mat gauss;
-	//GaussianBlur(sample, gauss, Size(7, 7), 20);
-	//Mat edges2;
-	//absdiff(sample, gauss, edges2);
-	//sample = sample + 2 * edges2;
-
 	Mat edges;
-	Canny(sample, edges, 10, 200, 3);
+	Canny(sample, edges, 70, 200, 3);
 	imshow("canny", edges);
 
 	Mat hough = Mat::zeros(sample.size(), CV_8U);
+
+	bool isTrain = false;
 
 	vector<Vec2f> lines;
 	HoughLines(edges, lines, 1, CV_PI/180, 120, 0, 0 );
 	for( size_t i = 0; i < lines.size(); i++ )
 	{
 		float rho = lines[i][0], theta = lines[i][1];
-		Point pt1, pt2;
-		double a = cos(theta), b = sin(theta);
-		double x0 = a*rho, y0 = b*rho;
-		pt1.x = cvRound(x0 + 1000*(-b));
-		pt1.y = cvRound(y0 + 1000*(a));
-		pt2.x = cvRound(x0 - 1000*(-b));
-		pt2.y = cvRound(y0 - 1000*(a));
-		line( samplePreview, pt1, pt2, Scalar(255, 0, 0), 3, CV_AA);
+		Scalar colour;
+		if (rho < 300.0f && theta > 1.15f && theta < 1.23f)
+		{
+			isTrain = true;
+			colour = Scalar(0, 0, 255);
+		}
+		else
+		{
+			colour = Scalar(255, 0, 0);
+		}
+
+		DrawLinePolar(samplePreview, rho, theta, colour);
 	}
 
-	//imshow("hough", hough);
+	if (isTrain)
+		cout << "TRAIN!!!" << endl;
 
 	imshow("orig", samplePreview);
 	imshow("result", imageColour);
+
+	cout << endl;
 
 	int key = waitKey();
 	return key == 'x' ? 1 : 0;
