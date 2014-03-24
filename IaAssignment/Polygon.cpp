@@ -50,7 +50,7 @@ bool Polygon::IsObjectInIt()
 {
 	for (auto& stat : _contourStats)
 	{
-		if (stat.areaInPolygon > 2000 && stat.percentageInPolygon > 30.0)
+		if (stat.areaInPolygon > 15000 || (stat.areaInPolygon > 2000 && stat.percentageInPolygon > 30.0))
 			return true;
 	}
 

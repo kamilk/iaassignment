@@ -67,6 +67,18 @@ vector<Point> GetBottomRightPolygon()
 	return polygon;
 }
 
+vector<Point> GetTrackPolygon()
+{
+	vector<Point> polygon;
+	polygon.push_back(Point(175, 255));
+	polygon.push_back(Point(395, 145));
+	polygon.push_back(Point(520, 80));
+	polygon.push_back(Point(665, 160));
+	polygon.push_back(Point(580, 225));
+	polygon.push_back(Point(315, 404));
+	return polygon;
+}
+
 int main(int argc, char *argv[]) try
 {
 	const char* sampleFileName;
@@ -78,7 +90,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00165.png";
+		sampleFileName = "samples\\all\\lc-00408.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
@@ -109,12 +121,14 @@ int main(int argc, char *argv[]) try
 	shared_ptr<Polygon> urPolygon(new Polygon("UR", GetUpperRightPolygon()));
 	shared_ptr<Polygon> blPolygon(new Polygon("BL", GetBottomLeftPolygon()));
 	shared_ptr<Polygon> brPolygon(new Polygon("BR", GetBottomRightPolygon()));
+	shared_ptr<Polygon> trackPolygon(new Polygon("TRACK", GetTrackPolygon()));
 
 	vector<shared_ptr<Polygon>> polygons;
 	polygons.push_back(ulPolygon);
 	polygons.push_back(urPolygon);
 	polygons.push_back(blPolygon);
 	polygons.push_back(brPolygon);
+	polygons.push_back(trackPolygon);
 
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
@@ -141,11 +155,6 @@ int main(int argc, char *argv[]) try
 		polygon->Draw(samplePreview, Scalar(0, 255, 0));
 		polygon->Draw(imageColour, Scalar(0, 255, 0));
 	}
-
-	if (ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt())
-		cout << "ENTERING!!!" << endl;
-	if (blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt())
-		cout << "LEAVING!!!" << endl;
 
 	Mat edges;
 	Canny(sample, edges, 70, 200, 3);
@@ -177,11 +186,17 @@ int main(int argc, char *argv[]) try
 		DrawLinePolar(samplePreview, rho, theta, colour);
 	}
 
+	if (ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt())
+		cout << "ENTERING!!!" << endl;
+	if (!isTrain && (blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt()))
+		cout << "LEAVING!!!" << endl;
 	if (isTrain)
 		DrawLinePolar(samplePreview, highestTrainLine[0], highestTrainLine[1], Scalar(0, 255, 255), 3);
 
 	if (isTrain)
 		cout << "TRAIN!!!" << endl;
+	if (!isTrain && trackPolygon->IsObjectInIt())
+		cout << "ONTRACK!!!" << endl;
 
 	imshow("orig", samplePreview);
 	imshow("result", imageColour);
