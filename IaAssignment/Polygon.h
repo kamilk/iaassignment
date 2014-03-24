@@ -14,6 +14,7 @@ public:
 	void TestContour(const cv::Mat& contourImage);
 	void Write(std::ostream& stream);
 	void Draw(cv::Mat& image, cv::Scalar colour);
+	bool IsObjectInIt();
 
 private:
 	std::string _name;

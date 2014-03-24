@@ -29,6 +29,9 @@ void Polygon::Write(std::ostream& stream)
 
 	for (auto& stat : _contourStats)
 	{
+		if (stat.areaInPolygon == 0)
+			continue;
+
 		stream << stat.areaInPolygon
 			<< " / " << stat.totalArea
 			<< " (" << stat.percentageInPolygon << "%)"
@@ -41,4 +44,15 @@ void Polygon::Write(std::ostream& stream)
 void Polygon::Draw(cv::Mat& image, cv::Scalar colour)
 {
 	drawContours(image, _polygon, -1, colour, 2);
+}
+
+bool Polygon::IsObjectInIt()
+{
+	for (auto& stat : _contourStats)
+	{
+		if (stat.areaInPolygon > 2000 && stat.percentageInPolygon > 30.0)
+			return true;
+	}
+
+	return false;
 }

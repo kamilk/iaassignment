@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv.hpp>
 #include <fstream>
+#include <memory>
 #include "Polygon.h"
 
 using namespace std;
@@ -101,11 +102,16 @@ int main(int argc, char *argv[]) try
 	vector<vector<Point>> contours;
 	findContours(image.clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-	vector<Polygon> polygons;
-	polygons.push_back(Polygon("UL", GetUpperLeftPolygon()));
-	polygons.push_back(Polygon("UR", GetUpperRightPolygon()));
-	polygons.push_back(Polygon("BL", GetBottomLeftPolygon()));
-	polygons.push_back(Polygon("BR", GetBottomRightPolygon()));
+	shared_ptr<Polygon> ulPolygon(new Polygon("UL", GetUpperLeftPolygon()));
+	shared_ptr<Polygon> urPolygon(new Polygon("UR", GetUpperRightPolygon()));
+	shared_ptr<Polygon> blPolygon(new Polygon("BL", GetBottomLeftPolygon()));
+	shared_ptr<Polygon> brPolygon(new Polygon("BR", GetBottomRightPolygon()));
+
+	vector<shared_ptr<Polygon>> polygons;
+	polygons.push_back(ulPolygon);
+	polygons.push_back(urPolygon);
+	polygons.push_back(blPolygon);
+	polygons.push_back(brPolygon);
 
 	Mat imageColour;
 	cvtColor(image, imageColour, COLOR_GRAY2BGR);
@@ -120,18 +126,25 @@ int main(int argc, char *argv[]) try
 			Mat contourImage = Mat::zeros(image.rows, image.cols, CV_8U);
 			drawContours(contourImage, contours, i, Scalar(255), CV_FILLED);
 			for (auto& polygon : polygons)
-				polygon.TestContour(contourImage);
+				polygon->TestContour(contourImage);
 		}
 	}
 
 	for (auto& polygon : polygons)
-		polygon.Write(cout);
+		polygon->Write(cout);
 
 	for (auto& polygon : polygons)
 	{
-		polygon.Draw(sample, Scalar(0));
-		polygon.Draw(imageColour, Scalar(0, 255, 0));
+		polygon->Draw(sample, Scalar(0));
+		polygon->Draw(imageColour, Scalar(0, 255, 0));
 	}
+
+	if (ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt())
+		cout << "ENTERING!!!" << endl;
+	if (blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt())
+		cout << "LEAVING!!!" << endl;
+
+	cout << endl;
 
 	imshow("orig", sample);
 	imshow("result", imageColour);
