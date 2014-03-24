@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) try
 	{
 		float rho = lines[i][0], theta = lines[i][1];
 		Scalar colour;
-		if (rho < 300.0f && theta > 1.15f && theta < 1.23f)
+		if (rho < 280.0f && theta > 1.15f && theta < 1.23f)
 		{
 			isTrain = true;
 			colour = Scalar(0, 0, 255);
