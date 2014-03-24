@@ -154,6 +154,7 @@ int main(int argc, char *argv[]) try
 	Mat hough = Mat::zeros(sample.size(), CV_8U);
 
 	bool isTrain = false;
+	Vec2f highestTrainLine;
 
 	vector<Vec2f> lines;
 	HoughLines(edges, lines, 1, CV_PI/180, 120, 0, 0 );
@@ -163,8 +164,10 @@ int main(int argc, char *argv[]) try
 		Scalar colour;
 		if (rho < 300.0f && theta > 1.15f && theta < 1.23f)
 		{
-			isTrain = true;
+			if (!isTrain || highestTrainLine[0] > rho)
+				highestTrainLine = lines[i];
 			colour = Scalar(0, 0, 255);
+			isTrain = true;
 		}
 		else
 		{
@@ -173,6 +176,9 @@ int main(int argc, char *argv[]) try
 
 		DrawLinePolar(samplePreview, rho, theta, colour);
 	}
+
+	if (isTrain)
+		DrawLinePolar(samplePreview, highestTrainLine[0], highestTrainLine[1], Scalar(0, 255, 255), 3);
 
 	if (isTrain)
 		cout << "TRAIN!!!" << endl;

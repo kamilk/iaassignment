@@ -31,7 +31,7 @@ int GetNumberOfWhitePixels(const Mat& image)
 		return result;
 }
 
-void DrawLinePolar(cv::Mat& image, float rho, float theta, Scalar colour)
+void DrawLinePolar(cv::Mat& image, float rho, float theta, Scalar colour, int thickness)
 {
 	// adapted from http://docs.opencv.org/doc/tutorials/imgproc/imgtrans/hough_lines/hough_lines.html
 	Point pt1, pt2;
@@ -42,5 +42,5 @@ void DrawLinePolar(cv::Mat& image, float rho, float theta, Scalar colour)
 	pt2.x = cvRound(x0 - 1000*(-b));
 	pt2.y = cvRound(y0 - 1000*(a));
 
-	line( image, pt1, pt2, colour, 1, CV_AA);
+	line( image, pt1, pt2, colour, thickness, CV_AA);
 }
