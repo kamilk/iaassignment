@@ -4,9 +4,67 @@
 #include <memory>
 #include "Polygon.h"
 #include "functions.h"
+#include "EventLogger.h"
 
 using namespace std;
 using namespace cv;
+
+Mat CropCctvBorder(Mat& image);
+bool IsContourAcceptable(vector<Point>& contour);
+vector<Point> GetUpperLeftPolygon();
+vector<Point> GetUpperRightPolygon();
+vector<Point> GetBottomLeftPolygon();
+vector<Point> GetBottomRightPolygon();
+vector<Point> GetTrackPolygon();
+bool CheckTrain(const Mat& sample, Mat& samplePreview);
+void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, EventLogger& eventLogger);
+
+int main(int argc, char *argv[]) try
+{
+	const char* sampleFileName;
+	const char* emptyRoadFileName;
+	if (argc >= 3)
+	{
+		sampleFileName = argv[1];
+		emptyRoadFileName = argv[2];
+	}
+	else
+	{
+		sampleFileName = "samples\\all\\lc-00408.png";
+		emptyRoadFileName = "data\\empty.png";
+	}
+
+	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
+	empty = CropCctvBorder(empty);
+
+	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_COLOR);
+	sample = CropCctvBorder(sample);
+	Mat samplePreview = sample.clone();
+	cvtColor(sample, sample, COLOR_BGR2GRAY);
+
+	EventLogger eventLogger;
+	CheckCarPresence(sample, samplePreview, empty, eventLogger);
+	eventLogger.train = CheckTrain(sample, samplePreview);
+
+	imshow("orig", samplePreview);
+
+	eventLogger.Write(cout);
+
+	int key = waitKey();
+	return key == 'x' ? 1 : 0;
+}
+catch (cv::Exception &ex)
+{
+	std::cerr << ex.code << std::endl;
+}
+catch (std::exception &ex)
+{
+	std::cerr << "Exception of type " << typeid(ex).name() << " with message " << ex.what() << std::endl;
+}
+catch (...)
+{
+	std::cerr << "Unexpected error!" << std::endl;
+}
 
 Mat CropCctvBorder(Mat& image)
 {
@@ -79,29 +137,40 @@ vector<Point> GetTrackPolygon()
 	return polygon;
 }
 
-int main(int argc, char *argv[]) try
+bool CheckTrain(const Mat& sample, Mat& samplePreview)
 {
-	const char* sampleFileName;
-	const char* emptyRoadFileName;
-	if (argc >= 3)
+	Mat edges;
+	Canny(sample, edges, 70, 200, 3);
+	imshow("canny", edges);
+
+	Mat hough = Mat::zeros(sample.size(), CV_8U);
+
+	vector<Vec2f> lines;
+	HoughLines(edges, lines, 1, CV_PI/180, 120, 0, 0 );
+
+	bool isTrain = false;
+	for( size_t i = 0; i < lines.size(); i++ )
 	{
-		sampleFileName = argv[1];
-		emptyRoadFileName = argv[2];
+		float rho = lines[i][0], theta = lines[i][1];
+		Scalar colour;
+		if (rho < 280.0f && theta > 1.15f && theta < 1.23f)
+		{
+			isTrain = true;
+			colour = Scalar(0, 0, 255);
+		}
+		else
+		{
+			colour = Scalar(255, 0, 0);
+		}
+
+		DrawLinePolar(samplePreview, rho, theta, colour);
 	}
-	else
-	{
-		sampleFileName = "samples\\all\\lc-00408.png";
-		emptyRoadFileName = "data\\empty.png";
-	}
 
-	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
-	empty = CropCctvBorder(empty);
+	return isTrain;
+}
 
-	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_COLOR);
-	sample = CropCctvBorder(sample);
-	Mat samplePreview = sample.clone();
-	cvtColor(sample, sample, COLOR_BGR2GRAY);
-
+void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, EventLogger& eventLogger)
+{
 	Mat image;
 	absdiff(empty, sample, image);
 
@@ -156,59 +225,9 @@ int main(int argc, char *argv[]) try
 		polygon->Draw(imageColour, Scalar(0, 255, 0));
 	}
 
-	Mat edges;
-	Canny(sample, edges, 70, 200, 3);
-	imshow("canny", edges);
-
-	Mat hough = Mat::zeros(sample.size(), CV_8U);
-
-	bool isTrain = false;
-
-	vector<Vec2f> lines;
-	HoughLines(edges, lines, 1, CV_PI/180, 120, 0, 0 );
-	for( size_t i = 0; i < lines.size(); i++ )
-	{
-		float rho = lines[i][0], theta = lines[i][1];
-		Scalar colour;
-		if (rho < 280.0f && theta > 1.15f && theta < 1.23f)
-		{
-			isTrain = true;
-			colour = Scalar(0, 0, 255);
-		}
-		else
-		{
-			colour = Scalar(255, 0, 0);
-		}
-
-		DrawLinePolar(samplePreview, rho, theta, colour);
-	}
-
-	if (ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt())
-		cout << "ENTERING!!!" << endl;
-	if (!isTrain && (blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt()))
-		cout << "LEAVING!!!" << endl;
-	if (isTrain)
-		cout << "TRAIN!!!" << endl;
-	if (!isTrain && trackPolygon->IsObjectInIt())
-		cout << "ONTRACK!!!" << endl;
-
-	imshow("orig", samplePreview);
 	imshow("result", imageColour);
 
-	cout << endl;
-
-	int key = waitKey();
-	return key == 'x' ? 1 : 0;
-}
-catch (cv::Exception &ex)
-{
-	std::cerr << ex.code << std::endl;
-}
-catch (std::exception &ex)
-{
-	std::cerr << "Exception of type " << typeid(ex).name() << " with message " << ex.what() << std::endl;
-}
-catch (...)
-{
-	std::cerr << "Unexpected error!" << std::endl;
+	eventLogger.entering = ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt();
+	eventLogger.leaving = blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt();
+	eventLogger.ontrack = trackPolygon->IsObjectInIt();
 }

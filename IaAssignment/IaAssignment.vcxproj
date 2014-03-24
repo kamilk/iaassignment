@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ContourPolygonStats.h" />
+    <ClInclude Include="EventLogger.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="Polygon.h" />
   </ItemGroup>

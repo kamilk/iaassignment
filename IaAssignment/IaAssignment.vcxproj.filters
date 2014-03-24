@@ -35,5 +35,8 @@
     <ClInclude Include="ContourPolygonStats.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EventLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
