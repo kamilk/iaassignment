@@ -32,9 +32,9 @@ int main(int argc, char *argv[]) try
 #ifdef HANDIN
 	for (int i = 1; i < argc; i++)
 	{
-		EventLogger eventLogger(argv[i]);
+		EventLogger eventLogger;
 		ClassifyImage(argv[i], defaultEmptyPath, eventLogger);
-		eventLogger.WriteForMachine(cout);
+		eventLogger.WriteForMachine(cout, argv[i]);
 	}
 #else
 	const char* sampleFileName;

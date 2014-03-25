@@ -4,15 +4,13 @@
 
 struct EventLogger
 {
-	const char* filename;
 	bool train;
 	bool leaving;
 	bool entering;
 	bool ontrack;
 	bool barrier;
 
-	EventLogger(const char* filename = nullptr) : filename(filename), train(false), 
-		leaving(false), entering(false), ontrack(false), barrier(false) {}
+	EventLogger() : train(false), leaving(false), entering(false), ontrack(false), barrier(false) {}
 
 	void WriteForHuman(std::ostream& stream)
 	{
@@ -30,7 +28,7 @@ struct EventLogger
 		stream << std::endl;
 	}
 
-	void WriteForMachine(std::ostream& stream)
+	void WriteForMachine(std::ostream& stream, const char* filename)
 	{
 		if (!filename)
 			throw std::runtime_error("filename not specified for machine-readable logging.");
