@@ -23,6 +23,7 @@ public:
 	}
 	double Rho() { return Displacement() * Width() / Length(); }
 	double Theta() { return -atan(Width() / Height()); }
+	int MaxX() { return std::max(end.x, start.x); }
 
 	cv::Point start;
 	cv::Point end;

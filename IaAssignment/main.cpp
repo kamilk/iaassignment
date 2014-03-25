@@ -206,12 +206,24 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 
 bool IsLineBarrier(Line& line)
 {
-	return line.DistanceFromPoint(Point2d(-13, 223.5)) < 15.0;
+	return line.MaxX() < 345 && line.DistanceFromPoint(Point2d(-13, 223.5)) < 15.0;
 }
 
 bool IsLineTrain(Line& line)
 {
-	return line.Rho() < 280.0f && line.Theta() > 1.15f && line.Theta() < 1.23f;
+	if (line.Theta() < 1.15f || line.Theta() > 1.23f)
+		return false; // wrong angle
+
+	if (line.Rho() > 280.0)
+		return false; // too low
+
+	if (line.MaxX() < 360 && line.Rho() > 241.5 && line.Rho() < 256.0)
+		return false; // probably a shadow of the barrier
+
+	if (line.MaxX() < 270 && line.Rho() > 180.0 && line.Rho() < 188.0)
+		return false; // probably the stopping line
+
+	return true; // passed all the conditions
 }
 
 void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger)
@@ -242,13 +254,13 @@ void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger)
 		{
 			colour = Scalar(0, 0, 255);
 			eventLogger.train = true;
+
+			cout << currentLine.Rho() << endl;
 		}
 		else
 		{
 			colour = Scalar(255, 0, 255);
 		}
-
-		cout << currentLine.Rho() << '\t' << currentLine.Theta() << endl;
 
 		line( samplePreview, start, end, colour, 1, CV_AA);
 		rectangle(samplePreview, Point(l[0] - 2, l[1] - 2), Point(l[0] + 2, l[1] + 2), Scalar(0, 0, 255), CV_FILLED);
