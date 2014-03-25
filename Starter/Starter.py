@@ -18,3 +18,6 @@ def launch_for_file(path):
 
     exit_code = call([exe, path, '..\\IaAssignment\\data\\empty.png'])
     return exit_code
+
+def get_individual_path(section):
+    return os.path.join('..\\IaAssignment\\samples\\individual', section)
