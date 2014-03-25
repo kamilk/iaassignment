@@ -43,7 +43,7 @@ struct EventLogger
 			WriteEvent(stream, 3);
 		if (barrier)
 			WriteEvent(stream, 4);
-		if (train)
+		if (train || barrier)
 			WriteEvent(stream, 5);
 
 		stream << std::endl;
