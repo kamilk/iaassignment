@@ -41,9 +41,9 @@ struct EventLogger
 			WriteEvent(stream, 2);
 		if (!train && leaving)
 			WriteEvent(stream, 3);
-		if (barrier)
+		if (barrier || train)
 			WriteEvent(stream, 4);
-		if (train || barrier)
+		if (train)
 			WriteEvent(stream, 5);
 
 		stream << std::endl;
