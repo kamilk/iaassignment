@@ -252,7 +252,7 @@ bool IsLineTrain(Line& line)
 	if (line.MaxX() < 360 && line.Rho() > 241.5 && line.Rho() < 256.0)
 		return false; // probably a shadow of the barrier
 
-	if (line.MaxX() < 270 && line.Rho() > 176.0 && line.Rho() < 188.0)
+	if (line.MaxX() < 270 && line.Rho() > 173.5 && line.Rho() < 188.0)
 		return false; // probably the stopping line
 
 	return true; // passed all the conditions
