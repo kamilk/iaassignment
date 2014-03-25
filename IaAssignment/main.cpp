@@ -20,6 +20,8 @@ vector<Point> GetTrackPolygon();
 bool CheckTrain(const Mat& sample, Mat& samplePreview, const Mat& edges);
 void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, EventLogger& eventLogger);
 bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges);
+void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger);
+bool IsLineBarrier(Line& line);
 
 int main(int argc, char *argv[]) try
 {
@@ -44,14 +46,9 @@ int main(int argc, char *argv[]) try
 	Mat samplePreview = sample.clone();
 	cvtColor(sample, sample, COLOR_BGR2GRAY);
 
-	Mat edges;
-	Canny(sample, edges, 70, 150, 3);
-	imshow("canny", edges);
-
 	EventLogger eventLogger;
 	CheckCarPresence(sample, samplePreview, empty, eventLogger);
-	eventLogger.train = CheckTrain(sample, samplePreview, edges);
-	eventLogger.barrier = CheckBarrier(sample, samplePreview, edges);
+	CheckLines(sample, samplePreview, eventLogger);
 
 	imshow("orig", samplePreview);
 
@@ -144,34 +141,6 @@ vector<Point> GetTrackPolygon()
 	return polygon;
 }
 
-bool CheckTrain(const Mat& sample, Mat& samplePreview, const Mat& edges)
-{
-	Mat hough = Mat::zeros(sample.size(), CV_8U);
-
-	vector<Vec2f> lines;
-	HoughLines(edges, lines, 1, CV_PI/180, 120, 0, 0 );
-
-	bool isTrain = false;
-	for( size_t i = 0; i < lines.size(); i++ )
-	{
-		float rho = lines[i][0], theta = lines[i][1];
-		Scalar colour;
-		if (rho < 280.0f && theta > 1.15f && theta < 1.23f)
-		{
-			isTrain = true;
-			colour = Scalar(0, 0, 255);
-		}
-		else
-		{
-			colour = Scalar(255, 0, 0);
-		}
-
-		DrawLinePolar(samplePreview, rho, theta, colour);
-	}
-
-	return isTrain;
-}
-
 void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, EventLogger& eventLogger)
 {
 	Mat image;
@@ -240,8 +209,17 @@ bool IsLineBarrier(Line& line)
 	return line.DistanceFromPoint(Point2d(-13, 223.5)) < 15.0;
 }
 
-bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges)
+bool IsLineTrain(Line& line)
 {
+	return line.Rho() < 280.0f && line.Theta() > 1.15f && line.Theta() < 1.23f;
+}
+
+void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger)
+{
+	Mat edges;
+	Canny(sample, edges, 70, 150, 3);
+	imshow("canny", edges);
+
 	vector<Vec4i> lines;
 	HoughLinesP(edges, lines, 1, CV_PI/180, 30, 100, 10 );
 
@@ -258,17 +236,22 @@ bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges)
 		if (IsLineBarrier(currentLine))
 		{
 			colour = Scalar(0, 255, 255);
-			isBarrier = true;
+			eventLogger.barrier = true;
+		}
+		else if (IsLineTrain(currentLine))
+		{
+			colour = Scalar(0, 0, 255);
+			eventLogger.train = true;
 		}
 		else
 		{
 			colour = Scalar(255, 0, 255);
 		}
 
+		cout << currentLine.Rho() << '\t' << currentLine.Theta() << endl;
+
 		line( samplePreview, start, end, colour, 1, CV_AA);
 		rectangle(samplePreview, Point(l[0] - 2, l[1] - 2), Point(l[0] + 2, l[1] + 2), Scalar(0, 0, 255), CV_FILLED);
 		rectangle(samplePreview, Point(l[2] - 2, l[3] - 2), Point(l[2] + 2, l[3] + 2), Scalar(0, 0, 255), CV_FILLED);
 	}
-
-	return isBarrier;
 }

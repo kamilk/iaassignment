@@ -15,6 +15,14 @@ public:
 	{
 		return abs(Slope() * point.x - point.y + Displacement()) / sqrt(Slope()*Slope() + 1);
 	}
+	double Length()
+	{
+		double w = Width();
+		double h = Height();
+		return sqrt(w*w + h*h);
+	}
+	double Rho() { return Displacement() * Width() / Length(); }
+	double Theta() { return -atan(Width() / Height()); }
 
 	cv::Point start;
 	cv::Point end;
