@@ -8,6 +8,9 @@ struct EventLogger
 	bool leaving;
 	bool entering;
 	bool ontrack;
+	bool barrier;
+
+	EventLogger() : train(false), leaving(false), entering(false), ontrack(false), barrier(false) {}
 
 	void Write(std::ostream& stream)
 	{
@@ -19,6 +22,8 @@ struct EventLogger
 			stream << "ONTRACK!!!" << std::endl;
 		if (train)
 			stream << "TRAIN!!!" << std::endl;
+		if (barrier)
+			stream << "BARRIER!!!" << std::endl;
 
 		stream << std::endl;
 	}

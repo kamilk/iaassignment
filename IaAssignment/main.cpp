@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) try
 	EventLogger eventLogger;
 	CheckCarPresence(sample, samplePreview, empty, eventLogger);
 	eventLogger.train = CheckTrain(sample, samplePreview, edges);
-	CheckBarrier(sample, samplePreview, edges);
+	eventLogger.barrier = CheckBarrier(sample, samplePreview, edges);
 
 	imshow("orig", samplePreview);
 
@@ -239,6 +239,7 @@ bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges)
 	vector<Vec4i> lines;
 	HoughLinesP(edges, lines, 1, CV_PI/180, 30, 100, 10 );
 
+	bool isBarrier = false;
 	for( size_t i = 0; i < lines.size(); i++ )
 	{
 		Vec4i l = lines[i];
@@ -253,25 +254,22 @@ bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges)
 
 		Point2d originPoint(-13, 223.5);
 		double distance = abs(slope * originPoint.x - originPoint.y + displacement) / sqrt(slope*slope + 1);
-		if (distance < 100)
-			cout << distance << '\t' << slope << '\t' << displacement << endl;
 
 		Scalar colour;
 		if (distance < 15.0)
 		{
 			colour = Scalar(0, 255, 255);
+			isBarrier = true;
 		}
 		else
 		{
 			colour = Scalar(255, 0, 255);
 		}
 
-		line( samplePreview, start, end, colour, 2, CV_AA);
+		line( samplePreview, start, end, colour, 1, CV_AA);
 		rectangle(samplePreview, Point(l[0] - 2, l[1] - 2), Point(l[0] + 2, l[1] + 2), Scalar(0, 0, 255), CV_FILLED);
 		rectangle(samplePreview, Point(l[2] - 2, l[3] - 2), Point(l[2] + 2, l[3] + 2), Scalar(0, 0, 255), CV_FILLED);
 	}
 
-
-
-	return false;
+	return isBarrier;
 }
