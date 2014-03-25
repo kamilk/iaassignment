@@ -16,8 +16,9 @@ vector<Point> GetUpperRightPolygon();
 vector<Point> GetBottomLeftPolygon();
 vector<Point> GetBottomRightPolygon();
 vector<Point> GetTrackPolygon();
-bool CheckTrain(const Mat& sample, Mat& samplePreview);
+bool CheckTrain(const Mat& sample, Mat& samplePreview, const Mat& edges);
 void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, EventLogger& eventLogger);
+bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges);
 
 int main(int argc, char *argv[]) try
 {
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00408.png";
+		sampleFileName = "samples\\all\\lc-00442.png";
 		emptyRoadFileName = "data\\empty.png";
 	}
 
@@ -42,9 +43,14 @@ int main(int argc, char *argv[]) try
 	Mat samplePreview = sample.clone();
 	cvtColor(sample, sample, COLOR_BGR2GRAY);
 
+	Mat edges;
+	Canny(sample, edges, 70, 150, 3);
+	imshow("canny", edges);
+
 	EventLogger eventLogger;
 	CheckCarPresence(sample, samplePreview, empty, eventLogger);
-	eventLogger.train = CheckTrain(sample, samplePreview);
+	eventLogger.train = CheckTrain(sample, samplePreview, edges);
+	CheckBarrier(sample, samplePreview, edges);
 
 	imshow("orig", samplePreview);
 
@@ -137,12 +143,8 @@ vector<Point> GetTrackPolygon()
 	return polygon;
 }
 
-bool CheckTrain(const Mat& sample, Mat& samplePreview)
+bool CheckTrain(const Mat& sample, Mat& samplePreview, const Mat& edges)
 {
-	Mat edges;
-	Canny(sample, edges, 70, 200, 3);
-	imshow("canny", edges);
-
 	Mat hough = Mat::zeros(sample.size(), CV_8U);
 
 	vector<Vec2f> lines;
@@ -230,4 +232,46 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 	eventLogger.entering = ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt();
 	eventLogger.leaving = blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt();
 	eventLogger.ontrack = trackPolygon->IsObjectInIt();
+}
+
+bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges)
+{
+	vector<Vec4i> lines;
+	HoughLinesP(edges, lines, 1, CV_PI/180, 30, 100, 10 );
+
+	for( size_t i = 0; i < lines.size(); i++ )
+	{
+		Vec4i l = lines[i];
+		Point start = Point(l[0], l[1]);
+		Point end = Point(l[2], l[3]);
+
+		double width = end.x - start.x;
+		double height = end.y - start.y;
+
+		double slope = height / width;
+		double displacement = start.y - slope * start.x;
+
+		Point2d originPoint(-13, 223.5);
+		double distance = abs(slope * originPoint.x - originPoint.y + displacement) / sqrt(slope*slope + 1);
+		if (distance < 100)
+			cout << distance << '\t' << slope << '\t' << displacement << endl;
+
+		Scalar colour;
+		if (distance < 15.0)
+		{
+			colour = Scalar(0, 255, 255);
+		}
+		else
+		{
+			colour = Scalar(255, 0, 255);
+		}
+
+		line( samplePreview, start, end, colour, 2, CV_AA);
+		rectangle(samplePreview, Point(l[0] - 2, l[1] - 2), Point(l[0] + 2, l[1] + 2), Scalar(0, 0, 255), CV_FILLED);
+		rectangle(samplePreview, Point(l[2] - 2, l[3] - 2), Point(l[2] + 2, l[3] + 2), Scalar(0, 0, 255), CV_FILLED);
+	}
+
+
+
+	return false;
 }
