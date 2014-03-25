@@ -22,6 +22,7 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges);
 void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger);
 bool IsLineBarrier(Line& line);
+bool IsLineTrain(Line& line);
 
 int main(int argc, char *argv[]) try
 {
