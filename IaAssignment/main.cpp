@@ -10,6 +10,7 @@
 using namespace std;
 using namespace cv;
 
+void ClassifyImage(const char* samplePath, const char* emptyPath, EventLogger& eventLogger);
 Mat CropCctvBorder(Mat& image);
 bool IsContourAcceptable(vector<Point>& contour);
 vector<Point> GetUpperLeftPolygon();
@@ -26,6 +27,16 @@ bool IsLineTrain(Line& line);
 
 int main(int argc, char *argv[]) try
 {
+	const char* defaultEmptyPath = "data\\empty.png";
+
+#ifdef HANDIN
+	for (int i = 1; i < argc; i++)
+	{
+		EventLogger eventLogger(argv[i]);
+		ClassifyImage(argv[i], defaultEmptyPath, eventLogger);
+		eventLogger.WriteForMachine(cout);
+	}
+#else
 	const char* sampleFileName;
 	const char* emptyRoadFileName;
 	if (argc >= 3)
@@ -36,27 +47,16 @@ int main(int argc, char *argv[]) try
 	else
 	{
 		sampleFileName = "samples\\all\\lc-00442.png";
-		emptyRoadFileName = "data\\empty.png";
+		emptyRoadFileName = defaultEmptyPath;
 	}
 
-	Mat empty = imread(emptyRoadFileName, CV_LOAD_IMAGE_GRAYSCALE);
-	empty = CropCctvBorder(empty);
-
-	Mat sample = imread(sampleFileName, CV_LOAD_IMAGE_COLOR);
-	sample = CropCctvBorder(sample);
-	Mat samplePreview = sample.clone();
-	cvtColor(sample, sample, COLOR_BGR2GRAY);
-
 	EventLogger eventLogger;
-	CheckCarPresence(sample, samplePreview, empty, eventLogger);
-	CheckLines(sample, samplePreview, eventLogger);
-
-	imshow("orig", samplePreview);
-
-	eventLogger.Write(cout);
+	ClassifyImage(sampleFileName, emptyRoadFileName, eventLogger);
+	eventLogger.WriteForHuman(cout);
 
 	int key = waitKey();
 	return key == 'x' ? 1 : 0;
+#endif
 }
 catch (cv::Exception &ex)
 {
@@ -75,6 +75,35 @@ Mat CropCctvBorder(Mat& image)
 {
 	return image(Range(56, 460), Range(25, 690));
 }
+
+void ClassifyImage(const char* samplePath, const char* emptyPath, EventLogger& eventLogger)
+{
+	Mat empty = imread(emptyPath, CV_LOAD_IMAGE_GRAYSCALE);
+	if (empty.empty())
+	{
+		cout << "FAILED TO LOAD THE 'EMPTY' IMAGE!" << endl;
+		return;
+	}
+
+	empty = CropCctvBorder(empty);
+
+	Mat sample = imread(samplePath, CV_LOAD_IMAGE_COLOR);
+	if (sample.empty())
+	{
+		cout << "FAILED TO LOAD THE 'SAMPLE' IMAGE!" << endl;
+		return;
+	}
+
+	sample = CropCctvBorder(sample);
+	Mat samplePreview = sample.clone();
+	cvtColor(sample, sample, COLOR_BGR2GRAY);
+
+	CheckCarPresence(sample, samplePreview, empty, eventLogger);
+	CheckLines(sample, samplePreview, eventLogger);
+
+	ShowPreviewImage("orig", samplePreview);
+}
+
 
 bool IsContourAcceptable(vector<Point>& contour)
 {
@@ -189,8 +218,10 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 		}
 	}
 
+#ifndef HANDIN
 	for (auto& polygon : polygons)
 		polygon->Write(cout);
+#endif
 
 	for (auto& polygon : polygons)
 	{
@@ -198,7 +229,7 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 		polygon->Draw(imageColour, Scalar(0, 255, 0));
 	}
 
-	imshow("result", imageColour);
+	ShowPreviewImage("result", imageColour);
 
 	eventLogger.entering = ulPolygon->IsObjectInIt() || brPolygon->IsObjectInIt();
 	eventLogger.leaving = blPolygon->IsObjectInIt() || urPolygon->IsObjectInIt();
@@ -221,7 +252,7 @@ bool IsLineTrain(Line& line)
 	if (line.MaxX() < 360 && line.Rho() > 241.5 && line.Rho() < 256.0)
 		return false; // probably a shadow of the barrier
 
-	if (line.MaxX() < 270 && line.Rho() > 180.0 && line.Rho() < 188.0)
+	if (line.MaxX() < 270 && line.Rho() > 176.0 && line.Rho() < 188.0)
 		return false; // probably the stopping line
 
 	return true; // passed all the conditions
@@ -231,7 +262,7 @@ void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger)
 {
 	Mat edges;
 	Canny(sample, edges, 70, 150, 3);
-	imshow("canny", edges);
+	ShowPreviewImage("canny", edges);
 
 	vector<Vec4i> lines;
 	HoughLinesP(edges, lines, 1, CV_PI/180, 30, 100, 10 );
@@ -256,7 +287,9 @@ void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger)
 			colour = Scalar(0, 0, 255);
 			eventLogger.train = true;
 
+#ifndef HANDIN
 			cout << currentLine.Rho() << endl;
+#endif
 		}
 		else
 		{
@@ -264,7 +297,7 @@ void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger)
 		}
 
 		line( samplePreview, start, end, colour, 1, CV_AA);
-		rectangle(samplePreview, Point(l[0] - 2, l[1] - 2), Point(l[0] + 2, l[1] + 2), Scalar(0, 0, 255), CV_FILLED);
-		rectangle(samplePreview, Point(l[2] - 2, l[3] - 2), Point(l[2] + 2, l[3] + 2), Scalar(0, 0, 255), CV_FILLED);
+		rectangle(samplePreview, Point(l[0] - 2, l[1] - 2), Point(l[0] + 2, l[1] + 2), colour, CV_FILLED);
+		rectangle(samplePreview, Point(l[2] - 2, l[3] - 2), Point(l[2] + 2, l[3] + 2), colour, CV_FILLED);
 	}
 }

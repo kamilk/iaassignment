@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IaAssignment", "IaAssignment\IaAssignment.vcxproj", "{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}"
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Starter", "Starter\Starter.pyproj", "{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}"
@@ -15,6 +13,9 @@ Global
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|Win32 = Debug|Win32
+		Hand-in|Any CPU = Hand-in|Any CPU
+		Hand-in|Mixed Platforms = Hand-in|Mixed Platforms
+		Hand-in|Win32 = Hand-in|Win32
 		Release|Any CPU = Release|Any CPU
 		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|Win32 = Release|Win32
@@ -25,6 +26,11 @@ Global
 		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Debug|Win32.Build.0 = Debug|Win32
+		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Hand-in|Any CPU.ActiveCfg = Hand-in|Win32
+		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Hand-in|Mixed Platforms.ActiveCfg = Hand-in|Win32
+		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Hand-in|Mixed Platforms.Build.0 = Hand-in|Win32
+		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Hand-in|Win32.ActiveCfg = Hand-in|Win32
+		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Hand-in|Win32.Build.0 = Hand-in|Win32
 		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Release|Any CPU.ActiveCfg = Release|Win32
 		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{F8B1DA51-AACD-4DC7-B1C4-CDB15E843DF2}.Release|Mixed Platforms.Build.0 = Release|Win32
@@ -35,6 +41,9 @@ Global
 		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Hand-in|Any CPU.ActiveCfg = Release|Any CPU
+		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Hand-in|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Hand-in|Win32.ActiveCfg = Release|Any CPU
 		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{23A785CD-C63D-43B9-A1ED-DB0437BB0F08}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU

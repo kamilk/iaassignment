@@ -44,3 +44,10 @@ void DrawLinePolar(cv::Mat& image, float rho, float theta, Scalar colour)
 
 	line( image, pt1, pt2, colour, 1, CV_AA);
 }
+
+void ShowPreviewImage(const std::string& winname, cv::Mat& image)
+{
+#ifndef HANDIN
+	imshow(winname, image);
+#endif
+}

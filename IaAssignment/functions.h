@@ -6,3 +6,4 @@
 int GetNumberOfWhitePixelsInPolygon(const cv::Mat& image, const std::vector<cv::Point>& polygon);
 int GetNumberOfWhitePixels(const cv::Mat& image);
 void DrawLinePolar(cv::Mat& image, float rho, float theta, cv::Scalar colour);
+void ShowPreviewImage(const std::string& winname, cv::Mat& image);
