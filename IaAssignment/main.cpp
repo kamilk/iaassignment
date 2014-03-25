@@ -5,6 +5,7 @@
 #include "Polygon.h"
 #include "functions.h"
 #include "EventLogger.h"
+#include "Line.h"
 
 using namespace std;
 using namespace cv;
@@ -234,6 +235,11 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 	eventLogger.ontrack = trackPolygon->IsObjectInIt();
 }
 
+bool IsLineBarrier(Line& line)
+{
+	return line.DistanceFromPoint(Point2d(-13, 223.5)) < 15.0;
+}
+
 bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges)
 {
 	vector<Vec4i> lines;
@@ -246,17 +252,10 @@ bool CheckBarrier(const Mat& sample, Mat& samplePreview, const Mat& edges)
 		Point start = Point(l[0], l[1]);
 		Point end = Point(l[2], l[3]);
 
-		double width = end.x - start.x;
-		double height = end.y - start.y;
-
-		double slope = height / width;
-		double displacement = start.y - slope * start.x;
-
-		Point2d originPoint(-13, 223.5);
-		double distance = abs(slope * originPoint.x - originPoint.y + displacement) / sqrt(slope*slope + 1);
+		Line currentLine(start, end);
 
 		Scalar colour;
-		if (distance < 15.0)
+		if (IsLineBarrier(currentLine))
 		{
 			colour = Scalar(0, 255, 255);
 			isBarrier = true;
