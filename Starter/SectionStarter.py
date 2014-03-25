@@ -4,6 +4,7 @@ import sys
 
 if len(sys.argv) < 2:
     print 'Not enough arguments'
+    exit()
 
 dir = os.path.join('..\\IaAssignment\\samples\\individual', sys.argv[1])
 for file in os.listdir(dir):
