@@ -241,7 +241,7 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 
 bool IsLineBarrier(Line& line)
 {
-	return line.MaxX() < 345 && line.DistanceFromPoint(Point2d(-13, 223.5)) < 15.0;
+	return line.MaxX() < 345 && line.DistanceFromPoint(Point2d(-13, 223.5)) < 15.0 && line.Theta() < 1.3;
 }
 
 bool IsLineTrain(Line& line)
