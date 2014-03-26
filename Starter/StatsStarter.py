@@ -22,9 +22,9 @@ count = 0
 while True:
     line = proc.stdout.readline()
     if line == '': break
+    print line.strip()
     line = line[(line.find(':')+1):]
     events = r.findall(line)
-    print events
     for event in events:
         stats[int(event) - 1] += 1
     count += 1
@@ -32,4 +32,4 @@ while True:
 descriptions = ['ontrack', 'entering', 'leaving', 'barrier', 'train']
 print 'TOTAL: ', count
 for event, occur in enumerate(stats):
-    print 'Event ', event + 1, ' (', descriptions[event], ')\t: ', occur, ' (', occur/count * 100, '%)'
+    print 'Event ', event + 1, ' (', descriptions[event], ')\t: ', occur, '\t(', occur/count * 100, '%)'
