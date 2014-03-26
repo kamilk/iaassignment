@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00090.png";
+		sampleFileName = "samples\\all\\lc-00536.png";
 		emptyRoadFileName = defaultEmptyPath;
 	}
 
@@ -246,13 +246,13 @@ bool IsLineBarrier(Line& line)
 
 bool IsLineTrain(Line& line)
 {
-	if (line.Theta() < 1.15f || line.Theta() > 1.23f)
+	if (line.Theta() < 1.15 || line.Theta() > 1.26)
 		return false; // wrong angle
 
-	if (line.Rho() > 280.0)
+	if (line.Rho() > 270.0)
 		return false; // too low
 
-	if (line.MaxX() < 360 && line.Rho() > 241.5 && line.Rho() < 256.0)
+	if (line.MaxX() < 370 && line.Rho() > 241.5 && line.Rho() < 260.0)
 		return false; // probably a shadow of the barrier
 
 	if (line.MaxX() < 270 && line.Rho() > 172.0 && line.Rho() < 188.0)
@@ -291,7 +291,7 @@ void CheckLines(const Mat& sample, Mat& samplePreview, EventLogger& eventLogger)
 			eventLogger.train = true;
 
 #ifndef HANDIN
-			cout << currentLine.Rho() << endl;
+			cout << "rho: " << currentLine.Rho() << " theta: " << currentLine.Theta() << "maxX: " << currentLine.MaxX() << endl;
 #endif
 		}
 		else
