@@ -193,6 +193,7 @@ void CheckCarPresence(const Mat& sample, Mat& samplePreview, const Mat& empty, E
 	shared_ptr<Polygon> blPolygon(new Polygon("BL", GetBottomLeftPolygon()));
 	shared_ptr<Polygon> brPolygon(new Polygon("BR", GetBottomRightPolygon()));
 	shared_ptr<Polygon> trackPolygon(new Polygon("TRACK", GetTrackPolygon()));
+	trackPolygon->SetPercentageThreshold(20.0);
 
 	vector<shared_ptr<Polygon>> polygons;
 	polygons.push_back(ulPolygon);

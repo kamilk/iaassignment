@@ -4,7 +4,7 @@
 using namespace std;
 using namespace cv;
 
-Polygon::Polygon(const std::string& name, std::vector<cv::Point>&& polygon) : _name(name)
+Polygon::Polygon(const std::string& name, std::vector<cv::Point>&& polygon) : _name(name), _percentageThreshold(30.0)
 {
 	_polygon.push_back(polygon);
 }
@@ -50,7 +50,7 @@ bool Polygon::IsObjectInIt()
 {
 	for (auto& stat : _contourStats)
 	{
-		if (stat.areaInPolygon > 15000 || (stat.areaInPolygon > 2000 && stat.percentageInPolygon > 30.0))
+		if (stat.areaInPolygon > 15000 || (stat.areaInPolygon > 2000 && stat.percentageInPolygon > _percentageThreshold))
 			return true;
 	}
 

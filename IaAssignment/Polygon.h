@@ -15,10 +15,12 @@ public:
 	void Write(std::ostream& stream);
 	void Draw(cv::Mat& image, cv::Scalar colour);
 	bool IsObjectInIt();
+	void SetPercentageThreshold(double threshold) { _percentageThreshold = threshold; }
 
 private:
 	std::string _name;
 	std::vector<std::vector<cv::Point>> _polygon;
 	std::vector<ContourPolygonStats> _contourStats;
+	double _percentageThreshold;
 };
 
