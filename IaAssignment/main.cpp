@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) try
 	}
 	else
 	{
-		sampleFileName = "samples\\all\\lc-00442.png";
+		sampleFileName = "samples\\all\\lc-00090.png";
 		emptyRoadFileName = defaultEmptyPath;
 	}
 
@@ -168,6 +168,8 @@ vector<Point> GetTrackPolygon()
 	polygon.push_back(Point(665, 160));
 	polygon.push_back(Point(580, 225));
 	polygon.push_back(Point(315, 404));
+	polygon.push_back(Point(200, 404));
+	polygon.push_back(Point(90, 305));
 	return polygon;
 }
 
