@@ -50,6 +50,10 @@ bool Polygon::IsObjectInIt()
 {
 	for (auto& stat : _contourStats)
 	{
+		// An object is considered to be significant with respect to this polygon if
+		// a) there are at least 2000 pixels in the polygon and those pixels constitute at
+		//    least __percentageThreshold (30% by default) of the whole contour
+		// b) OR the contour has at least 15000 pixels in the image, regardless of the percentage.
 		if (stat.areaInPolygon > 15000 || (stat.areaInPolygon > 2000 && stat.percentageInPolygon > _percentageThreshold))
 			return true;
 	}

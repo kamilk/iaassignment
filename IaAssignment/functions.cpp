@@ -45,6 +45,7 @@ void DrawLinePolar(cv::Mat& image, float rho, float theta, Scalar colour)
 	line( image, pt1, pt2, colour, 1, CV_AA);
 }
 
+// A thin wrapper around cv::imshow(). In HANDIN mode, the function does nothing.
 void ShowPreviewImage(const std::string& winname, cv::Mat& image)
 {
 #ifndef HANDIN
